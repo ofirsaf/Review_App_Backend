@@ -70,7 +70,16 @@ exports.verifyEmail = async (req, res) => {
     subject: "Wellcome Email",
     html: "<h1>Wellcome to review app</h1>",
   });
-  res.json({ message: "user verified" });
+  const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+  res.json({
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      token: jwtToken,
+    },
+    message: "user verified",
+  });
 };
 
 exports.reSendEmailVerificationToken = async (req, res) => {
