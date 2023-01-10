@@ -13,7 +13,7 @@ exports.create = async (req, res) => {
     email: email,
   });
   if (oldUser) {
-    return sendEroor(res, "the email is already registered");
+    return sendEroor(res, "the email is already in use");
   }
   const newUser = new User({ name, email, password });
   await newUser.save();
@@ -26,7 +26,6 @@ exports.create = async (req, res) => {
     token: OTP,
   });
   await newEmailVerificationToken.save();
-
   //send OTP to user email
   var transport = genertaeMailTrapTransport();
 
@@ -39,7 +38,13 @@ exports.create = async (req, res) => {
     `,
   });
 
-  res.status(201).json("Otp sent to your email");
+  res.status(201).json({
+    user: {
+      id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+    },
+  });
 };
 
 exports.verifyEmail = async (req, res) => {
@@ -49,7 +54,7 @@ exports.verifyEmail = async (req, res) => {
   const user = await User.findById(userId);
   if (!user) return sendEroor(res, "user not found", 404);
   if (user.isVerified) return sendEroor(res, "user already verified");
-  const token = await emailVarificationToken.findOne({ owner: userId });
+  const token = await EmailVerificationToken.findOne({ owner: userId });
   if (!token) return sendEroor(res, "token not found");
 
   const isMatch = await token.compareToken(OTP);
@@ -57,7 +62,7 @@ exports.verifyEmail = async (req, res) => {
 
   user.isVerified = true;
   await user.save();
-  await emailVarificationToken.findByIdAndDelete(token._id);
+  await EmailVerificationToken.findByIdAndDelete(token._id);
   var transport = genertaeMailTrapTransport();
   transport.sendMail({
     from: "verfication@reviewapp.com",

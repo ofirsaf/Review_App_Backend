@@ -25,7 +25,9 @@ exports.signInValidator = [
 ];
 exports.runValidation = (req, res, next) => {
   const errors = validationResult(req).array();
+  
   if (errors.length) {
+    console.log(errors,"ofir");
     return res.json({ error: errors[0].msg });
   }
   next();
