@@ -116,7 +116,7 @@ exports.reSendEmailVerificationToken = async (req, res) => {
 
 exports.foregetPassword = async (req, res) => {
   const { email } = req.body;
-
+  console.log(email);
   if (!email) return sendEroor(res, "email is required");
 
   const user = await User.findOne({ email });
@@ -135,7 +135,7 @@ exports.foregetPassword = async (req, res) => {
     token,
   });
   await newToken.save();
-  const resetPasswordUrl = `http://localhost:3000/reset-password?token=${token}&id=${user._id}`;
+  const resetPasswordUrl = `http://localhost:3000/auth/reset-password/${token}/${user._id}`;
   const transport = genertaeMailTrapTransport();
   transport.sendMail({
     from: "security@reviewapp.com",
