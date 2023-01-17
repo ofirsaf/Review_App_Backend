@@ -77,6 +77,7 @@ exports.verifyEmail = async (req, res) => {
       name: user.name,
       email: user.email,
       token: jwtToken,
+      isVerified: user.isVerified,
     },
     message: "user verified",
   });
@@ -84,10 +85,11 @@ exports.verifyEmail = async (req, res) => {
 
 exports.reSendEmailVerificationToken = async (req, res) => {
   const { userId } = req.body;
+  console.log(userId);
   const user = await User.findById(userId);
   if (!user) return sendEroor(res, "user not found");
   if (user.isVerified) return sendEroor(res, "user already verified");
-  const alreadyHastoken = await emailVarificationToken.findOne({
+  const alreadyHastoken = await EmailVerificationToken.findOne({
     owner: userId,
   });
   if (alreadyHastoken)
@@ -116,7 +118,6 @@ exports.reSendEmailVerificationToken = async (req, res) => {
 
 exports.foregetPassword = async (req, res) => {
   const { email } = req.body;
-  console.log(email);
   if (!email) return sendEroor(res, "email is required");
 
   const user = await User.findOne({ email });
@@ -185,13 +186,13 @@ exports.signIn = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) return sendEroor(res, "Email/Password is not correct");
-  if (!user.isVerified) return sendEroor(res, "user not verified");
+  // if (!user.isVerified) return sendEroor(res, "user not verified");
 
   const matched = await user.comparePassword(password);
   if (!matched) return sendEroor(res, "Email/Password is not correct");
 
-  const { _id, name } = user;
+  const { _id, name, isVerified } = user;
 
   const jwtToken = jwt.sign({ userId: _id }, process.env.JWT_SECRET);
-  res.json({ user: { id: _id, name, email, token: jwtToken } });
+  res.json({ user: { id: _id, name, email, token: jwtToken, isVerified } });
 };
