@@ -25,9 +25,22 @@ exports.signInValidator = [
 ];
 exports.runValidation = (req, res, next) => {
   const errors = validationResult(req).array();
-  
+
   if (errors.length) {
     return res.json({ error: errors[0].msg });
   }
+  next();
+};
+exports.actorInfoValidator = [
+  check("name").trim().not().isEmpty().withMessage("Acotor name is missing"),
+  check("about").trim().not().isEmpty().withMessage("about is required"),
+  check("gender").trim().not().isEmpty().withMessage("Gender is required"),
+];
+exports.validate = (req, res, next) => {
+  const error = validationResult(req).array();
+  if (error.length) {
+    return res.json({ error: error[0].msg });
+  }
+
   next();
 };
