@@ -186,13 +186,14 @@ exports.signIn = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) return sendEroor(res, "Email/Password is not correct");
-  // if (!user.isVerified) return sendEroor(res, "user not verified");
 
   const matched = await user.comparePassword(password);
   if (!matched) return sendEroor(res, "Email/Password is not correct");
 
-  const { _id, name, isVerified } = user;
+  const { _id, name, role, isVerified } = user;
 
   const jwtToken = jwt.sign({ userId: _id }, process.env.JWT_SECRET);
-  res.json({ user: { id: _id, name, email, token: jwtToken, isVerified } });
+  res.json({
+    user: { id: _id, name, email, role, token: jwtToken, isVerified },
+  });
 };
